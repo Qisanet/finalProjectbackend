@@ -28,7 +28,7 @@ const getRecipe = async (req, res) => {
 };
 
 const addRecipe = async (req, res) => {
-  const { title, ingredients, instructions, time } = req.body;
+  const { title, ingredients, instructions, time,file } = req.body;
 
   if (!title || !ingredients || !instructions) {
     return res.status(400).json({ message: "Required fields can't be empty" });
@@ -39,14 +39,14 @@ const addRecipe = async (req, res) => {
     ingredients,
     instructions,
     time,
-    coverImage: req.file.filename,
+    coverImage: file,
     createdBy: req.user.id,
   });
   return res.json(newRecipe);
 };
 
 const editRecipe = async (req, res) => {
-  const { title, ingredients, instructions, time } = req.body;
+  const { title, ingredients, instructions, time,file } = req.body;
   const recipe = await Recipes.findById(req.params.id);
 
   if (!recipe) {
@@ -58,10 +58,10 @@ const editRecipe = async (req, res) => {
     return res.status(403).json({ message: "You are not authorized to edit this recipe" });
   }
 
-  const coverImage = req.file?.filename ? req.file.filename : recipe.coverImage;
+
   const updatedRecipe = await Recipes.findByIdAndUpdate(
     req.params.id,
-    { title, ingredients, instructions, time, coverImage },
+    { title, ingredients, instructions, time, coverImage:file },
     { new: true }
   );
   res.json(updatedRecipe);
