@@ -4,6 +4,7 @@ const dotenv = require("dotenv").config();
 const connectDb = require("./config/connectionDb");
 
 const cors = require("cors");
+
 const PORT = process.env.PORT || 5500;
 
 connectDb();

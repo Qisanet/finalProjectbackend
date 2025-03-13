@@ -1,5 +1,5 @@
 const express = require("express");
-const { getRecipes, getRecipe, addRecipe, editRecipe, deleteRecipe, upload ,isRecipeOwner,addFavorite,getFavorites} = require("../controller/recipe");
+const { getRecipes, getRecipe, addRecipe, editRecipe, deleteRecipe, upload ,isRecipeOwner,addFavorite,getFavorites, removeFavorite } = require("../controller/recipe");
 const verifyToken = require("../middleware/auth");
 const router = express.Router();
 
@@ -11,6 +11,7 @@ router.delete("/:id", verifyToken, deleteRecipe); // Delete recipe
 router.get("/:id/isOwner", verifyToken, isRecipeOwner);
 router.post("/addFavorite", verifyToken, addFavorite);
 router.get("/my/getFavorites", verifyToken, getFavorites);
+router.delete("/:id/removeFavorite", verifyToken, removeFavorite);
 
 
 

@@ -167,7 +167,35 @@ const addFavorite = async (req, res) => {
 };
 
 
+const removeFavorite = async (req, res) => {
+  const { id } = req.params; // Recipe ID to remove from favorites
+  const userId = req.user.id; // User ID from the verified token
 
-module.exports = { getRecipes, getRecipe, addRecipe, editRecipe, deleteRecipe, upload,isRecipeOwner,addFavorite ,getFavorites};
+  try {
+    // Find the user and update their favorites list
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Remove the recipe ID from the user's favorites array
+    user.favorites = user.favorites.filter(
+      (favoriteId) => favoriteId.toString() !== id
+    );
+
+    // Save the updated user
+    await user.save();
+
+    res.status(200).json({ message: "Recipe removed from favorites" });
+  } catch (error) {
+    console.error("Error removing favorite:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+
+
+
+module.exports = { getRecipes, getRecipe, addRecipe, editRecipe, deleteRecipe, upload,isRecipeOwner,addFavorite ,getFavorites, removeFavorite };
 
 
