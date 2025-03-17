@@ -4,7 +4,8 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "build":"npm i"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
