@@ -11,6 +11,7 @@ router.delete("/:id", verifyToken, deleteRecipe); // Delete recipe
 router.get("/:id/isOwner", verifyToken, isRecipeOwner);
 router.post("/addFavorite", verifyToken, addFavorite);
 router.get("/my/getFavorites", verifyToken, getFavorites);
+// router.delete("/recipe/:id/removeFavorite.", verifyToken, removeFavorite);
 router.delete("/:id/removeFavorite", verifyToken, removeFavorite);
 
 

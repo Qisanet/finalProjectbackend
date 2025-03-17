@@ -1,7 +1,8 @@
+
+
 const Recipes = require("../models/recipe");
 const multer = require("multer");
-const User=require("../models/user");
-const Recipe = require("../models/recipe");
+const User = require("../models/user");
 const Favorite = require("../models/favorite");
 const mongoose = require("mongoose");
 
@@ -28,7 +29,7 @@ const getRecipe = async (req, res) => {
 };
 
 const addRecipe = async (req, res) => {
-  const { title, ingredients, instructions, time,file } = req.body;
+  const { title, ingredients, instructions, time, file } = req.body;
 
   if (!title || !ingredients || !instructions) {
     return res.status(400).json({ message: "Required fields can't be empty" });
@@ -46,7 +47,7 @@ const addRecipe = async (req, res) => {
 };
 
 const editRecipe = async (req, res) => {
-  const { title, ingredients, instructions, time,file } = req.body;
+  const { title, ingredients, instructions, time, file } = req.body;
   const recipe = await Recipes.findById(req.params.id);
 
   if (!recipe) {
@@ -58,10 +59,9 @@ const editRecipe = async (req, res) => {
     return res.status(403).json({ message: "You are not authorized to edit this recipe" });
   }
 
-
   const updatedRecipe = await Recipes.findByIdAndUpdate(
     req.params.id,
-    { title, ingredients, instructions, time, coverImage:file },
+    { title, ingredients, instructions, time, coverImage: file },
     { new: true }
   );
   res.json(updatedRecipe);
@@ -94,8 +94,6 @@ const isRecipeOwner = async (req, res) => {
   res.json({ isOwner });
 };
 
-
-
 const getFavorites = async (req, res) => {
   try {
     // Validate the ObjectId to avoid errors
@@ -119,44 +117,54 @@ const getFavorites = async (req, res) => {
 };
 
 
-//an endpoint to get add a recipie to favorites
+
+
+// const removeFavorite = async (req, res) => {
+//   const { id } = req.params; // Recipe ID to remove from favorites
+//   const userId = req.user.id; // User ID from the verified token
+
+//   try {
+//     // Remove the favorite record from the database
+//     await Favorite.deleteOne({ user: userId, recipe: id });
+
+//     res.status(200).json({ message: "Recipe removed from favorites" });
+//   } catch (error) {
+//     console.error("Error removing favorite:", error);
+//     res.status(500).json({ message: "Server error" });
+//   }
+// };
+const removeFavorite = async (req, res) => {
+  const { id } = req.params; // Recipe ID to remove from favorites
+  const userId = req.user.id; // User ID from the verified token
+
+  try {
+    // Permanently delete the favorite record from the database
+    await Favorite.deleteOne({ user: userId, recipe: id });
+
+    res.status(200).json({ message: "Recipe removed from favorites" });
+  } catch (error) {
+    console.error("Error removing favorite:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+// backend/controller/recipe.js
 const addFavorite = async (req, res) => {
   try {
-    const { recipeId } = req.body; // recipeId will be sent in the request body
-
-
-    if (!mongoose.Types.ObjectId.isValid(recipeId)) {
-      return res.status(400).json({ message: "Invalid Recipe ID" });
-    }
+    const { recipeId } = req.body; // Expecting recipeId in the request body
+    const userId = req.user.id; // User ID from the authenticated token
 
     if (!recipeId) {
       return res.status(400).json({ message: "Recipe ID is required" });
     }
 
-    // Find the user from the database based on the authenticated user
-    const user = await User.findById(req.user.id); 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    // Check if the recipe exists
-    const recipe = await Recipe.findById(recipeId);
-    if (!recipe) {
-      return res.status(404).json({ message: "Recipe not found" });
-    }
-
-    // Check if the recipe is already in the favorites for the user
-    const existingFavorite = await Favorite.findOne({ user: user._id, recipe: recipeId });
+    // Check if the recipe is already in favorites
+    const existingFavorite = await Favorite.findOne({ user: userId, recipe: recipeId });
     if (existingFavorite) {
       return res.status(400).json({ message: "Recipe already in favorites" });
     }
 
-    // Create a new favorite record
-    const newFavorite = new Favorite({
-      user: user._id,
-      recipe: recipeId,
-    });
-
+    // Add the recipe to favorites
+    const newFavorite = new Favorite({ user: userId, recipe: recipeId });
     await newFavorite.save();
 
     res.json({ message: "Recipe added to favorites", favorite: newFavorite });
@@ -166,36 +174,15 @@ const addFavorite = async (req, res) => {
   }
 };
 
-
-const removeFavorite = async (req, res) => {
-  const { id } = req.params; // Recipe ID to remove from favorites
-  const userId = req.user.id; // User ID from the verified token
-
-  try {
-    // Find the user and update their favorites list
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    // Remove the recipe ID from the user's favorites array
-    user.favorites = user.favorites.filter(
-      (favoriteId) => favoriteId.toString() !== id
-    );
-
-    // Save the updated user
-    await user.save();
-
-    res.status(200).json({ message: "Recipe removed from favorites" });
-  } catch (error) {
-    console.error("Error removing favorite:", error);
-    res.status(500).json({ message: "Server error" });
-  }
+module.exports = {
+  getRecipes,
+  getRecipe,
+  addRecipe,
+  editRecipe,
+  deleteRecipe,
+  upload,
+  isRecipeOwner,
+  addFavorite,
+  getFavorites,
+  removeFavorite,
 };
-
-
-
-
-module.exports = { getRecipes, getRecipe, addRecipe, editRecipe, deleteRecipe, upload,isRecipeOwner,addFavorite ,getFavorites, removeFavorite };
-
-
